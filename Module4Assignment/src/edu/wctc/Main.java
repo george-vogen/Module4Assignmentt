@@ -17,7 +17,8 @@ public class Main {
         System.out.println("2) View rooms");
         System.out.println("3) Read rooms from file");
         System.out.println("4) Write rooms to file");
-        System.out.println("5) Exit");
+        System.out.println("5) Estimate paint cost");
+        System.out.println("6) Exit");
         System.out.print("Choose an option: ");
     }
 
@@ -37,12 +38,75 @@ public class Main {
         }
     }
 
+    private static int promptForInt(String prompt, int defaultVal) {
+        while (true) {
+            System.out.print(prompt + " (default: " + defaultVal + "): ");
+            String line = keyboard.nextLine().trim();
+            if (line.isEmpty()) {
+                return defaultVal;
+            }
+            try {
+                int val = Integer.parseInt(line);
+                if (val <= 0) {
+                    System.out.println("Value must be greater than zero.");
+                    continue;
+                }
+                return val;
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid integer.");
+            }
+        }
+    }
+
+    private static double promptForDouble(String prompt, double defaultVal) {
+        while (true) {
+            System.out.print(prompt + " (default: " + defaultVal + "): ");
+            String line = keyboard.nextLine().trim();
+            if (line.isEmpty()) {
+                return defaultVal;
+            }
+            try {
+                double val = Double.parseDouble(line);
+                if (val <= 0) {
+                    System.out.println("Value must be greater than zero.");
+                    continue;
+                }
+                return val;
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number.");
+            }
+        }
+    }
+
     private static void createRoom() {
         double length = promptForDimension("length");
         double width = promptForDimension("width");
         double height = promptForDimension("height");
         paintCalculator.addRoom(length, width, height);
         System.out.println("Room added.");
+    }
+
+    private static void estimateCost() {
+        if (paintCalculator.getRoomList().isEmpty()) {
+            System.out.println("No rooms available. Add a room first.");
+            return;
+        }
+
+        int defaultCoats = 1;
+        double defaultCoverage = paintCalculator.getCoveragePerGallon();
+        double defaultPrice = paintCalculator.getCostPerGallon();
+
+        int coats = promptForInt("Enter number of coats", defaultCoats);
+        double coverage = promptForDouble("Enter coverage per gallon (sq ft)", defaultCoverage);
+        double price = promptForDouble("Enter cost per gallon", defaultPrice);
+
+        int gallons = paintCalculator.gallonsNeeded(coats, coverage);
+        double totalCost = paintCalculator.totalCost(coats, price, coverage);
+
+        System.out.println("Total paintable area: " + String.format("%.2f", paintCalculator.getTotalArea()) + " sq ft");
+        System.out.println("Coats: " + coats);
+        System.out.println("Gallons needed: " + gallons);
+        System.out.println("Estimated total cost: $" + String.format("%.2f", totalCost));
     }
 
     private static void readFile() {
@@ -99,6 +163,9 @@ public class Main {
                     writeFile();
                     break;
                 case "5":
+                    estimateCost();
+                    break;
+                case "6":
                     running = false;
                     System.out.println("Goodbye.");
                     break;
